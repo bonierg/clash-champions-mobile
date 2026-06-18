@@ -365,15 +365,35 @@ function renderGameCard(game) {
 function renderExtremeStart() {
   const highScore = getHighScore();
   return `
-    <section class="figma-game-frame" aria-label="Extreme Addition start screen">
-      <img src="assets/extreme-game-figma.png" alt="Extreme Addition game start screen" />
+    <section class="coded-extreme-screen start-code-screen" aria-label="Extreme Addition start screen">
       <button class="visible-landscape-back" type="button" data-back aria-label="Kembali ke Games">${icon("back")}</button>
-      <div class="start-high-score" aria-label="High score kamu">
-        <span>HIGH SCORE-MU:</span>
-        <strong>${highScore ?? "-"}</strong>
+      <div class="storm-bg" aria-hidden="true"></div>
+      <div class="champion-stage" aria-hidden="true">
+        <img class="champion-photo" src="assets/extreme-champions.png" alt="" />
+        <p class="champion-callout">Kalahkan skor kami!</p>
+        <div class="champion-score-cards">
+          ${championScores
+            .map(
+              ([name, score]) => `
+                <article>
+                  <span>${name}</span>
+                  <strong>${score}</strong>
+                </article>
+              `,
+            )
+            .join("")}
+        </div>
       </div>
-      <button class="figma-hit figma-back-hit" type="button" data-back aria-label="Kembali ke Games"></button>
-      <button class="figma-hit figma-play-hit" type="button" data-instructions aria-label="Play Extreme Addition"></button>
+      <div class="start-copy">
+        <div class="adaptox-wordmark">ADAPTO<b>X</b></div>
+        <h1>EXTREME ADDITION</h1>
+        <p>Jumlahkan semua bilangan yang ada secepat mungkin!</p>
+        <div class="start-high-score" aria-label="High score kamu">
+          <span>HIGH SCORE-MU:</span>
+          <strong>${highScore ?? "-"}</strong>
+        </div>
+        <button class="start-play-button" type="button" data-instructions>PLAY</button>
+      </div>
     </section>
   `;
 }
@@ -381,10 +401,20 @@ function renderExtremeStart() {
 function renderExtremeInstructions() {
   const leaderboard = [...championScores, ...dummyScores];
   return `
-    <section class="figma-game-frame" aria-label="Extreme Addition instruction screen">
-      <img src="assets/extreme-instruction-figma.png" alt="Extreme Addition instructions and high score" />
-      <button class="figma-hit figma-back-hit" type="button" data-back aria-label="Kembali ke Games"></button>
-      <div class="instruction-leaderboard" aria-label="Leaderboard">
+    <section class="coded-extreme-screen instruction-code-screen" aria-label="Extreme Addition instruction screen">
+      <button class="visible-landscape-back" type="button" data-back aria-label="Kembali ke Games">${icon("back")}</button>
+      <div class="storm-bg" aria-hidden="true"></div>
+      <div class="instruction-copy-code">
+        <div class="adaptox-wordmark instruction-brand">ADAPTO<b>X</b></div>
+        <h1>EXTREME ADDITION</h1>
+        <ol>
+          <li>Permainan ini terdiri dari 3 ronde</li>
+          <li>Pada setiap ronde, carilah hasil penjumlahan dari bilangan-bilangan atau operasi bilangan-bilangan yang diberikan pada layar. Klik tombol di kanan atas layar untuk meng-input jawaban</li>
+          <li>Ronde baru akan terbuka setelah ronde sebelumnya berhasil diselesaikan</li>
+          <li>Selesaikan misi hingga 3 ronde untuk memenangkan permainan ini</li>
+        </ol>
+      </div>
+      <div class="instruction-leaderboard code-leaderboard" aria-label="Leaderboard">
         <h2>HIGH SCORE</h2>
         ${leaderboard
           .map(
