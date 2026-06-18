@@ -14,11 +14,13 @@ const episodes = [
 
 const games = [
   {
+    id: "extreme-addition",
     title: "Extreme Addition",
     image: "assets/game-extreme.png",
     description: "Jumlahkan semua bilangan yang ada secepat mungkin!",
   },
   {
+    id: "number-chains",
     title: "Number Chains",
     image: "assets/game-number.png",
     description: "Jumlahkan semua bilangan yang ada secepat mungkin!",
@@ -26,6 +28,7 @@ const games = [
 ];
 
 let activeTab = "episode";
+let activeScreen = "tabs";
 
 const app = document.querySelector("#app");
 
@@ -47,33 +50,65 @@ function icon(name) {
 }
 
 function render() {
+  const detailScreen = activeScreen !== "tabs";
   app.innerHTML = `
-    <section class="phone-frame">
-      <div class="screen-content ${activeTab === "games" ? "games-screen" : ""}">
-        ${renderPage()}
+    <section class="phone-frame ${detailScreen ? "detail-frame" : ""}">
+      <div class="screen-content ${screenClass()}">
+        ${renderScreen()}
       </div>
-      ${renderTabbar()}
+      ${detailScreen ? "" : renderTabbar()}
     </section>
   `;
 
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => {
       activeTab = button.dataset.tab;
+      activeScreen = "tabs";
       render();
     });
   });
 
-  document.querySelectorAll("[data-play]").forEach((button) => {
+  document.querySelectorAll("[data-open-game]").forEach((button) => {
     button.addEventListener("click", () => {
-      button.textContent = "COMING SOON";
+      activeScreen = "extreme-start";
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-instructions]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeScreen = "extreme-instructions";
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-back]").forEach((button) => {
+    button.addEventListener("click", () => {
+      activeScreen = "tabs";
+      activeTab = "games";
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-ready]").forEach((button) => {
+    button.addEventListener("click", () => {
+      button.textContent = "GAME SOON";
       window.setTimeout(() => {
-        button.textContent = "PLAY";
+        button.textContent = "I'M READY";
       }, 1200);
     });
   });
 }
 
-function renderPage() {
+function screenClass() {
+  if (activeScreen === "extreme-start") return "extreme-screen extreme-start-screen";
+  if (activeScreen === "extreme-instructions") return "extreme-screen extreme-instruction-screen";
+  return activeTab === "games" ? "games-screen" : "";
+}
+
+function renderScreen() {
+  if (activeScreen === "extreme-start") return renderExtremeStart();
+  if (activeScreen === "extreme-instructions") return renderExtremeInstructions();
   if (activeTab === "episode") return renderEpisodePage();
   if (activeTab === "games") return renderGamesPage();
   return renderEmptyState();
@@ -148,14 +183,78 @@ function renderGamesPage() {
 }
 
 function renderGameCard(game) {
+  const isExtreme = game.id === "extreme-addition";
   return `
-    <article class="game-card">
+    <article class="game-card" ${isExtreme ? 'data-open-game role="button" tabindex="0"' : ""}>
       <img src="${game.image}" alt="${game.title}" />
       <div class="game-body">
         <p>${game.description}</p>
-        <button class="play-button" type="button" data-play>PLAY</button>
+        <button class="play-button" type="button" ${isExtreme ? "data-open-game" : ""}>PLAY</button>
       </div>
     </article>
+  `;
+}
+
+function renderExtremeStart() {
+  return `
+    <button class="detail-back" type="button" data-back aria-label="Kembali ke Games">${icon("back")}</button>
+    <section class="extreme-hero">
+      <div class="adaptox-logo">ADAPTO<b>X</b></div>
+      <h1>EXTREME ADDITION</h1>
+      <p>Jumlahkan semua bilangan yang ada secepat mungkin!</p>
+      <div class="score-callout">
+        <span>HIGH SCORE-MU:</span>
+        <strong>15</strong>
+      </div>
+      <button class="extreme-button" type="button" data-instructions>PLAY</button>
+    </section>
+    <img class="players-art" src="assets/extreme-players.png" alt="Vannes dan Deo" />
+  `;
+}
+
+function renderExtremeInstructions() {
+  const leaders = [
+    ["1st", "VANNES", "17"],
+    ["2nd", "DEO", "17"],
+    ["3rd", "NAME", "17"],
+    ["4th", "NAME", "17"],
+    ["5th", "NAME", "17"],
+    ["6th", "NAME", "17"],
+    ["7th", "NAME", "17"],
+    ["8th", "NAME", "17"],
+    ["9th", "NAME", "17"],
+  ];
+
+  return `
+    <button class="detail-back" type="button" data-back aria-label="Kembali ke Games">${icon("back")}</button>
+    <section class="instruction-layout">
+      <div class="instruction-copy">
+        <h1>EXTREME ADDITION</h1>
+        <ol>
+          <li>Permainan ini terdiri dari 3 ronde</li>
+          <li>Pada setiap ronde, carilah hasil penjumlahan dari bilangan-bilangan atau operasi bilangan-bilangan yang diberikan pada layar. Klik tombol di kanan atas layar untuk meng-input jawaban</li>
+          <li>Ronde baru akan terbuka setelah ronde sebelumnya berhasil diselesaikan</li>
+          <li>Selesaikan misi hingga 3 ronde untuk memenangkan permainan ini</li>
+        </ol>
+      </div>
+      <aside class="high-score">
+        <h2>HIGH SCORE</h2>
+        <div class="score-list">
+          ${leaders
+            .map(
+              ([rank, name, score]) => `
+                <div class="score-row-item">
+                  <span>${rank}</span>
+                  <strong>${name}</strong>
+                  <b>${score}</b>
+                </div>
+              `,
+            )
+            .join("")}
+        </div>
+      </aside>
+      <button class="extreme-button ready-button" type="button" data-ready>I'M READY</button>
+    </section>
   `;
 }
 
