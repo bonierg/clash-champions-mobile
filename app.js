@@ -27,8 +27,42 @@ const games = [
   },
 ];
 
+const rounds = [
+  {
+    numbers: [
+      [3, 8, 2, 7, 5, 6, 9, 8, 3, 4],
+      [5, 4, 8, 4, 7, 9, 0, 6, 5, 7],
+      [9, 7, 3, 8, 7, 2, 2, 2, 5, 8],
+      [3, 3, 6, 4, 0, 6, 3, 8, 6, 3],
+      [0, 2, 9, 0, 6, 2, 3, 1, 3, 6],
+    ],
+  },
+  {
+    numbers: [
+      [4, 6, 1, 8, 2, 9, 7, 5, 3, 2],
+      [7, 0, 5, 4, 8, 1, 6, 9, 2, 8],
+      [3, 9, 2, 5, 7, 4, 6, 0, 1, 5],
+      [8, 3, 6, 2, 9, 7, 4, 5, 8, 1],
+      [2, 5, 7, 3, 1, 8, 9, 4, 6, 0],
+    ],
+  },
+  {
+    numbers: [
+      [9, 1, 6, 3, 8, 2, 5, 7, 4, 0],
+      [2, 8, 4, 9, 6, 3, 1, 5, 7, 8],
+      [5, 7, 0, 2, 4, 8, 9, 6, 3, 1],
+      [6, 3, 8, 7, 5, 1, 2, 4, 0, 9],
+      [4, 9, 2, 5, 7, 6, 8, 3, 1, 2],
+    ],
+  },
+].map((round) => ({
+  ...round,
+  answer: round.numbers.flat().reduce((total, number) => total + number, 0),
+}));
+
 let activeTab = "episode";
 let activeScreen = "tabs";
+let gameState = freshGameState();
 
 const app = document.querySelector("#app");
 
@@ -93,10 +127,50 @@ function render() {
 
   document.querySelectorAll("[data-ready]").forEach((button) => {
     button.addEventListener("click", () => {
-      button.textContent = "GAME SOON";
-      window.setTimeout(() => {
-        button.textContent = "I'M READY";
-      }, 1200);
+      gameState = freshGameState();
+      activeScreen = "extreme-game";
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-show-answer]").forEach((button) => {
+    button.addEventListener("click", () => {
+      gameState.mode = "answer";
+      gameState.feedback = "";
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-show-question]").forEach((button) => {
+    button.addEventListener("click", () => {
+      gameState.mode = "question";
+      gameState.feedback = "";
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-key]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const value = button.dataset.key;
+      if (value === "clear") {
+        gameState.input = "";
+        gameState.feedback = "";
+      } else if (value === "submit") {
+        submitAnswer();
+        return;
+      } else if (gameState.input.length < 4) {
+        gameState.input += value;
+        gameState.feedback = "";
+      }
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-restart-game]").forEach((button) => {
+    button.addEventListener("click", () => {
+      gameState = freshGameState();
+      activeScreen = "extreme-game";
+      render();
     });
   });
 }
@@ -104,15 +178,31 @@ function render() {
 function screenClass() {
   if (activeScreen === "extreme-start") return "extreme-screen extreme-start-screen";
   if (activeScreen === "extreme-instructions") return "extreme-screen extreme-instruction-screen";
+  if (activeScreen === "extreme-game") return "extreme-screen extreme-play-screen";
+  if (activeScreen === "extreme-result") return "extreme-screen extreme-result-screen";
   return activeTab === "games" ? "games-screen" : "";
 }
 
 function renderScreen() {
   if (activeScreen === "extreme-start") return renderExtremeStart();
   if (activeScreen === "extreme-instructions") return renderExtremeInstructions();
+  if (activeScreen === "extreme-game") return renderExtremeGame();
+  if (activeScreen === "extreme-result") return renderExtremeResult();
   if (activeTab === "episode") return renderEpisodePage();
   if (activeTab === "games") return renderGamesPage();
   return renderEmptyState();
+}
+
+function freshGameState() {
+  return {
+    roundIndex: 0,
+    mode: "question",
+    input: "",
+    score: 0,
+    mistakes: 0,
+    feedback: "",
+    completed: [],
+  };
 }
 
 function renderEpisodePage() {
@@ -214,6 +304,123 @@ function renderExtremeInstructions() {
       <button class="figma-hit figma-ready-hit" type="button" data-ready aria-label="I'm ready"></button>
     </section>
   `;
+}
+
+function renderExtremeGame() {
+  const round = rounds[gameState.roundIndex];
+  if (gameState.mode === "answer") return renderAnswerScreen(round);
+  return renderQuestionScreen(round);
+}
+
+function renderQuestionScreen(round) {
+  return `
+    <section class="gameplay-frame question-mode">
+      <div class="gameplay-panel">
+        <div class="crest" aria-hidden="true"></div>
+        <div class="gameplay-topline">
+          <h1>Jumlahkan bilangan-bilangan berikut!</h1>
+          <button class="mode-toggle question-toggle" type="button" data-show-answer>
+            <span></span>
+            <b>Klik untuk input jawaban</b>
+          </button>
+        </div>
+        <div class="number-grid" aria-label="Daftar angka ronde ${gameState.roundIndex + 1}">
+          ${round.numbers.flat().map((number) => `<span>${number}</span>`).join("")}
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderAnswerScreen() {
+  return `
+    <section class="gameplay-frame answer-mode">
+      <div class="gameplay-panel">
+        <div class="crest" aria-hidden="true"></div>
+        <header class="answer-header">
+          <div class="adaptox-small">ADAPTO<b>X</b><span>On Ruangguru App</span></div>
+          <button class="mode-toggle answer-toggle" type="button" data-show-question>
+            <span></span>
+            <b>Klik untuk lihat soal</b>
+          </button>
+        </header>
+        <div class="answer-content">
+          <div class="answer-main">
+            <h1>RONDE ${gameState.roundIndex + 1}</h1>
+            <div class="answer-display ${gameState.feedback ? "has-feedback" : ""}">
+              <strong>${gameState.input || "JAWABAN KAMU"}</strong>
+            </div>
+            <p class="feedback ${gameState.feedback.includes("Benar") ? "correct" : "wrong"}">${gameState.feedback}</p>
+            <p class="score-text">SCORE: ${gameState.score}</p>
+          </div>
+          <div class="keypad" aria-label="Input angka">
+            ${[1, 2, 3, 4, 5, 6, 7, 8, 9].map((number) => `<button type="button" data-key="${number}">${number}</button>`).join("")}
+            <button class="clear-key" type="button" data-key="clear">×</button>
+            <button type="button" data-key="0">0</button>
+            <button class="submit-key" type="button" data-key="submit">➜</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function renderExtremeResult() {
+  const maxScore = rounds.length * 100;
+  const perfect = gameState.score >= maxScore;
+  return `
+    <section class="gameplay-frame result-mode">
+      <div class="gameplay-panel">
+        <div class="crest" aria-hidden="true"></div>
+        <div class="result-card">
+          <p>EXTREME ADDITION</p>
+          <h1>${perfect ? "CHAMPION!" : "SELESAI!"}</h1>
+          <strong>${gameState.score}</strong>
+          <span>Final Score</span>
+          <div class="result-stats">
+            <div><b>${gameState.completed.length}</b><small>Ronde selesai</small></div>
+            <div><b>${gameState.mistakes}</b><small>Jawaban salah</small></div>
+          </div>
+          <div class="result-actions">
+            <button class="extreme-button" type="button" data-restart-game>Main Lagi</button>
+            <button class="extreme-button ghost-result-button" type="button" data-back>Games</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  `;
+}
+
+function submitAnswer() {
+  const round = rounds[gameState.roundIndex];
+  const guess = Number(gameState.input);
+
+  if (!gameState.input) {
+    gameState.feedback = "Masukkan jawaban dulu.";
+    render();
+    return;
+  }
+
+  if (guess === round.answer) {
+    gameState.score += 100;
+    gameState.completed.push({ round: gameState.roundIndex + 1, score: gameState.score });
+    gameState.feedback = "Benar! Lanjut ronde berikutnya.";
+    gameState.input = "";
+
+    if (gameState.roundIndex >= rounds.length - 1) {
+      activeScreen = "extreme-result";
+    } else {
+      gameState.roundIndex += 1;
+      gameState.mode = "question";
+    }
+  } else {
+    gameState.score = Math.max(0, gameState.score - 25);
+    gameState.mistakes += 1;
+    gameState.feedback = "Jawaban salah. Coba hitung lagi!";
+    gameState.input = "";
+  }
+
+  render();
 }
 
 function renderEmptyState() {

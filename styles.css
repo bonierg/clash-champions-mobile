@@ -11,6 +11,9 @@
   --panel-dark: #102338;
   --orange: #ff6c0d;
   --gold: #ffc74f;
+  --neon-blue: #1bb9ff;
+  --neon-green: #24d20e;
+  --danger: #f90c2f;
   --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
 }
 
@@ -523,6 +526,385 @@ svg {
   top: 82.2%;
   width: 24.4%;
   height: 12.2%;
+}
+
+.gameplay-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 3.2% 3%;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(14, 73, 108, 0.42), transparent 34%),
+    linear-gradient(145deg, #061a2e, #03101e 58%, #09213a);
+}
+
+.gameplay-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.12) 0 1px, transparent 1.6px) 0 0 / 12px 12px,
+    linear-gradient(160deg, rgba(29, 132, 185, 0.18), transparent 36%, rgba(2, 7, 16, 0.32));
+  opacity: 0.55;
+}
+
+.gameplay-panel {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  padding: 5.6% 8.2% 6.2%;
+  border: clamp(4px, 0.9vw, 12px) solid rgba(171, 196, 217, 0.75);
+  border-radius: 4.2% / 8%;
+  background:
+    linear-gradient(180deg, rgba(3, 8, 15, 0.96), rgba(4, 15, 25, 0.9)),
+    radial-gradient(circle at 50% 55%, rgba(13, 87, 130, 0.55), transparent 48%);
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 255, 255, 0.22),
+    inset 0 0 40px rgba(52, 199, 255, 0.16),
+    0 18px 44px rgba(0, 0, 0, 0.55);
+}
+
+.crest {
+  position: absolute;
+  left: 50%;
+  top: -4.1%;
+  width: 6.4%;
+  aspect-ratio: 1;
+  border: 4px solid #98aaba;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 48% 42%, #39f8f2, #0abfc7 56%, #066e87);
+  box-shadow:
+    0 0 0 8px rgba(165, 183, 202, 0.28),
+    0 0 18px rgba(31, 240, 234, 0.72);
+  transform: translateX(-50%);
+}
+
+.crest::before,
+.crest::after {
+  content: "";
+  position: absolute;
+  top: 18%;
+  width: 130%;
+  height: 55%;
+  background: linear-gradient(90deg, rgba(204, 218, 232, 0), rgba(204, 218, 232, 0.78));
+  clip-path: polygon(0 48%, 100% 0, 84% 100%);
+}
+
+.crest::before {
+  right: 92%;
+}
+
+.crest::after {
+  left: 92%;
+  transform: scaleX(-1);
+}
+
+.gameplay-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 2.2%;
+}
+
+.gameplay-topline h1 {
+  margin: 0;
+  padding-left: 2px;
+  font-size: clamp(16px, 2.2vw, 28px);
+  line-height: 1;
+  text-shadow: 0 3px 5px rgba(0, 0, 0, 0.75);
+}
+
+.mode-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  background: transparent;
+  color: #f8fbff;
+  font-size: clamp(14px, 1.9vw, 24px);
+  font-weight: 900;
+  text-shadow: 0 3px 5px rgba(0, 0, 0, 0.75);
+  white-space: nowrap;
+}
+
+.mode-toggle span {
+  position: relative;
+  width: clamp(45px, 6.6vw, 84px);
+  height: clamp(24px, 3.6vw, 43px);
+  border: 3px solid rgba(116, 188, 255, 0.72);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #0c6de4, #064392);
+  box-shadow:
+    inset 0 2px 6px rgba(255, 255, 255, 0.5),
+    0 0 10px rgba(40, 156, 255, 0.62);
+}
+
+.mode-toggle span::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 8%;
+  width: 35%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #e3f3ff, #75a6cf);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.42);
+  transform: translateY(-50%);
+}
+
+.answer-toggle span::after {
+  left: auto;
+  right: 8%;
+}
+
+.number-grid {
+  display: grid;
+  grid-template-columns: repeat(10, 1fr);
+  width: 88%;
+  height: 82%;
+  border: 2px solid rgba(240, 248, 255, 0.9);
+}
+
+.number-grid span {
+  display: grid;
+  place-items: center;
+  border-right: 2px solid rgba(240, 248, 255, 0.86);
+  border-bottom: 2px solid rgba(240, 248, 255, 0.86);
+  color: #fff;
+  font-size: clamp(26px, 4.8vw, 58px);
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow:
+    0 2px 0 rgba(255, 255, 255, 0.12),
+    0 4px 8px rgba(0, 0, 0, 0.82);
+}
+
+.number-grid span:nth-child(10n) {
+  border-right: 0;
+}
+
+.number-grid span:nth-last-child(-n + 10) {
+  border-bottom: 0;
+}
+
+.answer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.adaptox-small {
+  display: grid;
+  gap: 2px;
+  font-size: clamp(17px, 2.4vw, 31px);
+  font-weight: 900;
+  line-height: 0.9;
+}
+
+.adaptox-small b {
+  font-size: 1.85em;
+  font-weight: 400;
+}
+
+.adaptox-small span {
+  font-size: 0.45em;
+  font-weight: 800;
+}
+
+.answer-content {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28%;
+  gap: 5%;
+  align-items: center;
+  height: 83%;
+}
+
+.answer-main {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 6%;
+  height: 100%;
+}
+
+.answer-main h1,
+.score-text {
+  margin: 0;
+  font-size: clamp(28px, 4.2vw, 54px);
+  line-height: 1;
+  font-weight: 1000;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.82);
+}
+
+.answer-display {
+  width: 72%;
+  min-height: clamp(58px, 11vw, 122px);
+  display: grid;
+  place-items: center;
+  padding: 0 5%;
+  border: 5px solid rgba(209, 224, 230, 0.82);
+  background:
+    linear-gradient(180deg, rgba(69, 255, 255, 0.86), rgba(5, 191, 200, 0.82)),
+    #13c9d2;
+  color: #083142;
+  box-shadow:
+    inset 0 0 18px rgba(255, 255, 255, 0.52),
+    0 0 0 2px rgba(10, 55, 71, 0.68);
+  text-align: center;
+}
+
+.answer-display strong {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(22px, 3.5vw, 45px);
+  font-weight: 1000;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feedback {
+  min-height: 24px;
+  margin: -2% 0 0;
+  font-size: clamp(13px, 1.6vw, 20px);
+  font-weight: 900;
+}
+
+.feedback.wrong {
+  color: #ff5970;
+}
+
+.feedback.correct {
+  color: #67ff72;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(8px, 1vw, 16px);
+}
+
+.keypad button {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 4px solid rgba(196, 207, 215, 0.95);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 42% 28%, #52e8ff 0 24%, var(--neon-blue) 56%, #0359c4 82%);
+  color: #052865;
+  font-size: clamp(26px, 4vw, 52px);
+  font-weight: 1000;
+  line-height: 1;
+  box-shadow:
+    inset 0 6px 10px rgba(255, 255, 255, 0.44),
+    inset 0 -8px 14px rgba(0, 34, 118, 0.52),
+    0 4px 7px rgba(0, 0, 0, 0.42);
+}
+
+.keypad .clear-key {
+  background:
+    radial-gradient(circle at 42% 28%, #ff7883 0 24%, var(--danger) 58%, #a50019 86%);
+  color: #6a0011;
+}
+
+.keypad .submit-key {
+  background:
+    radial-gradient(circle at 42% 28%, #aaff22 0 24%, var(--neon-green) 58%, #087000 86%);
+  color: #075406;
+}
+
+.result-mode .gameplay-panel {
+  display: grid;
+  place-items: center;
+}
+
+.result-card {
+  width: min(56%, 620px);
+  display: grid;
+  justify-items: center;
+  gap: clamp(8px, 1.2vw, 16px);
+  padding: 3.6% 4.4%;
+  border: 2px solid #4aa7c9;
+  background: rgba(2, 12, 24, 0.76);
+  box-shadow:
+    inset 0 0 24px rgba(74, 167, 201, 0.24),
+    0 12px 30px rgba(0, 0, 0, 0.38);
+  text-align: center;
+}
+
+.result-card p,
+.result-card span {
+  margin: 0;
+  color: #cbf7ff;
+  font-weight: 900;
+}
+
+.result-card h1 {
+  margin: 0;
+  color: #ffd365;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(30px, 5vw, 64px);
+  line-height: 1;
+  text-shadow: 0 3px 0 #63310c;
+}
+
+.result-card > strong {
+  color: var(--gold);
+  font-size: clamp(54px, 9vw, 116px);
+  font-style: italic;
+  line-height: 0.9;
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+}
+
+.result-stats div {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(35, 117, 159, 0.28);
+}
+
+.result-stats b {
+  font-size: clamp(22px, 3vw, 38px);
+}
+
+.result-stats small {
+  color: var(--muted);
+  font-size: clamp(11px, 1.3vw, 15px);
+}
+
+.result-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.extreme-button {
+  border-radius: 999px;
+  background: var(--orange);
+  color: #fff;
+  font-size: clamp(13px, 1.5vw, 18px);
+  font-weight: 1000;
+}
+
+.result-actions .extreme-button {
+  width: clamp(130px, 15vw, 180px);
+  min-height: clamp(38px, 5vw, 54px);
+}
+
+.ghost-result-button {
+  border: 2px solid rgba(255, 255, 255, 0.55);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .simple-top {
