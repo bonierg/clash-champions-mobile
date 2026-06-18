@@ -51,6 +51,7 @@ function icon(name) {
 
 function render() {
   const detailScreen = activeScreen !== "tabs";
+  app.className = `app-shell ${detailScreen ? "landscape-shell" : ""}`;
   app.innerHTML = `
     <section class="phone-frame ${detailScreen ? "detail-frame" : ""}">
       <div class="screen-content ${screenClass()}">
@@ -197,63 +198,20 @@ function renderGameCard(game) {
 
 function renderExtremeStart() {
   return `
-    <button class="detail-back" type="button" data-back aria-label="Kembali ke Games">${icon("back")}</button>
-    <section class="extreme-hero">
-      <div class="adaptox-logo">ADAPTO<b>X</b></div>
-      <h1>EXTREME ADDITION</h1>
-      <p>Jumlahkan semua bilangan yang ada secepat mungkin!</p>
-      <div class="score-callout">
-        <span>HIGH SCORE-MU:</span>
-        <strong>15</strong>
-      </div>
-      <button class="extreme-button" type="button" data-instructions>PLAY</button>
+    <section class="figma-game-frame" aria-label="Extreme Addition start screen">
+      <img src="assets/extreme-game-figma.png" alt="Extreme Addition game start screen" />
+      <button class="figma-hit figma-back-hit" type="button" data-back aria-label="Kembali ke Games"></button>
+      <button class="figma-hit figma-play-hit" type="button" data-instructions aria-label="Play Extreme Addition"></button>
     </section>
-    <img class="players-art" src="assets/extreme-players.png" alt="Vannes dan Deo" />
   `;
 }
 
 function renderExtremeInstructions() {
-  const leaders = [
-    ["1st", "VANNES", "17"],
-    ["2nd", "DEO", "17"],
-    ["3rd", "NAME", "17"],
-    ["4th", "NAME", "17"],
-    ["5th", "NAME", "17"],
-    ["6th", "NAME", "17"],
-    ["7th", "NAME", "17"],
-    ["8th", "NAME", "17"],
-    ["9th", "NAME", "17"],
-  ];
-
   return `
-    <button class="detail-back" type="button" data-back aria-label="Kembali ke Games">${icon("back")}</button>
-    <section class="instruction-layout">
-      <div class="instruction-copy">
-        <h1>EXTREME ADDITION</h1>
-        <ol>
-          <li>Permainan ini terdiri dari 3 ronde</li>
-          <li>Pada setiap ronde, carilah hasil penjumlahan dari bilangan-bilangan atau operasi bilangan-bilangan yang diberikan pada layar. Klik tombol di kanan atas layar untuk meng-input jawaban</li>
-          <li>Ronde baru akan terbuka setelah ronde sebelumnya berhasil diselesaikan</li>
-          <li>Selesaikan misi hingga 3 ronde untuk memenangkan permainan ini</li>
-        </ol>
-      </div>
-      <aside class="high-score">
-        <h2>HIGH SCORE</h2>
-        <div class="score-list">
-          ${leaders
-            .map(
-              ([rank, name, score]) => `
-                <div class="score-row-item">
-                  <span>${rank}</span>
-                  <strong>${name}</strong>
-                  <b>${score}</b>
-                </div>
-              `,
-            )
-            .join("")}
-        </div>
-      </aside>
-      <button class="extreme-button ready-button" type="button" data-ready>I'M READY</button>
+    <section class="figma-game-frame" aria-label="Extreme Addition instruction screen">
+      <img src="assets/extreme-instruction-figma.png" alt="Extreme Addition instructions and high score" />
+      <button class="figma-hit figma-back-hit" type="button" data-back aria-label="Kembali ke Games"></button>
+      <button class="figma-hit figma-ready-hit" type="button" data-ready aria-label="I'm ready"></button>
     </section>
   `;
 }
