@@ -65,6 +65,24 @@ let activeScreen = "tabs";
 let gameState = freshGameState();
 
 const app = document.querySelector("#app");
+const highScoreKey = "extremeAdditionHighScore";
+const championScores = [
+  ["VANNES", 170],
+  ["DEO", 160],
+];
+const dummyScores = [
+  ["ALYA", 145],
+  ["BIMA", 132],
+  ["CITRA", 121],
+  ["DANU", 118],
+  ["ELSA", 109],
+  ["FARIS", 98],
+  ["GITA", 92],
+  ["HANA", 87],
+];
+let instructionLoading = 0;
+let instructionReady = false;
+let loadingTimer = null;
 
 function icon(name) {
   const icons = {
@@ -97,6 +115,7 @@ function render() {
 
   document.querySelectorAll("[data-tab]").forEach((button) => {
     button.addEventListener("click", () => {
+      window.clearInterval(loadingTimer);
       activeTab = button.dataset.tab;
       activeScreen = "tabs";
       render();
@@ -112,6 +131,7 @@ function render() {
 
   document.querySelectorAll("[data-instructions]").forEach((button) => {
     button.addEventListener("click", () => {
+      beginInstructionLoading();
       activeScreen = "extreme-instructions";
       render();
     });
@@ -119,6 +139,7 @@ function render() {
 
   document.querySelectorAll("[data-back]").forEach((button) => {
     button.addEventListener("click", () => {
+      window.clearInterval(loadingTimer);
       activeScreen = "tabs";
       activeTab = "games";
       render();
@@ -127,6 +148,7 @@ function render() {
 
   document.querySelectorAll("[data-ready]").forEach((button) => {
     button.addEventListener("click", () => {
+      if (!instructionReady) return;
       gameState = freshGameState();
       activeScreen = "extreme-game";
       render();
@@ -173,6 +195,28 @@ function render() {
       render();
     });
   });
+
+  document.querySelectorAll("[data-surrender-open]").forEach((button) => {
+    button.addEventListener("click", () => {
+      gameState.confirmSurrender = true;
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-surrender-cancel]").forEach((button) => {
+    button.addEventListener("click", () => {
+      gameState.confirmSurrender = false;
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-surrender-confirm]").forEach((button) => {
+    button.addEventListener("click", () => {
+      gameState.surrendered = true;
+      gameState.confirmSurrender = false;
+      finishExtremeGame();
+    });
+  });
 }
 
 function screenClass() {
@@ -202,7 +246,39 @@ function freshGameState() {
     mistakes: 0,
     feedback: "",
     completed: [],
+    confirmSurrender: false,
+    surrendered: false,
   };
+}
+
+function getHighScore() {
+  const saved = Number(window.localStorage.getItem(highScoreKey));
+  return Number.isFinite(saved) && saved > 0 ? saved : null;
+}
+
+function saveHighScore(score) {
+  const current = getHighScore() || 0;
+  if (score > current) window.localStorage.setItem(highScoreKey, String(score));
+}
+
+function beginInstructionLoading() {
+  window.clearInterval(loadingTimer);
+  instructionLoading = 0;
+  instructionReady = false;
+  loadingTimer = window.setInterval(() => {
+    instructionLoading = Math.min(100, instructionLoading + 4);
+    const bar = document.querySelector("[data-loading-bar]");
+    const label = document.querySelector("[data-loading-label]");
+    const button = document.querySelector("[data-ready]");
+    if (bar) bar.style.setProperty("--progress", `${instructionLoading}%`);
+    if (label) label.textContent = instructionLoading >= 100 ? "I'M READY" : `LOADING ${instructionLoading}%`;
+    if (instructionLoading >= 100) {
+      instructionReady = true;
+      window.clearInterval(loadingTimer);
+      loadingTimer = null;
+      if (button) button.removeAttribute("aria-disabled");
+    }
+  }, 90);
 }
 
 function renderEpisodePage() {
@@ -287,9 +363,15 @@ function renderGameCard(game) {
 }
 
 function renderExtremeStart() {
+  const highScore = getHighScore();
   return `
     <section class="figma-game-frame" aria-label="Extreme Addition start screen">
       <img src="assets/extreme-game-figma.png" alt="Extreme Addition game start screen" />
+      <button class="visible-landscape-back" type="button" data-back aria-label="Kembali ke Games">${icon("back")}</button>
+      <div class="start-high-score" aria-label="High score kamu">
+        <span>HIGH SCORE-MU:</span>
+        <strong>${highScore ?? "-"}</strong>
+      </div>
       <button class="figma-hit figma-back-hit" type="button" data-back aria-label="Kembali ke Games"></button>
       <button class="figma-hit figma-play-hit" type="button" data-instructions aria-label="Play Extreme Addition"></button>
     </section>
@@ -297,13 +379,38 @@ function renderExtremeStart() {
 }
 
 function renderExtremeInstructions() {
+  const leaderboard = [...championScores, ...dummyScores];
   return `
     <section class="figma-game-frame" aria-label="Extreme Addition instruction screen">
       <img src="assets/extreme-instruction-figma.png" alt="Extreme Addition instructions and high score" />
       <button class="figma-hit figma-back-hit" type="button" data-back aria-label="Kembali ke Games"></button>
-      <button class="figma-hit figma-ready-hit" type="button" data-ready aria-label="I'm ready"></button>
+      <div class="instruction-leaderboard" aria-label="Leaderboard">
+        <h2>HIGH SCORE</h2>
+        ${leaderboard
+          .map(
+            ([name, score], index) => `
+              <div class="instruction-row ${index < 2 ? "champion" : ""}">
+                <span>${index + 1}${rankSuffix(index + 1)}</span>
+                <strong>${name}</strong>
+                <b>${score}</b>
+              </div>
+            `,
+          )
+          .join("")}
+      </div>
+      <button class="loading-ready ${instructionReady ? "ready" : ""}" type="button" data-ready aria-disabled="${instructionReady ? "false" : "true"}">
+        <span data-loading-bar style="--progress:${instructionLoading}%"></span>
+        <b data-loading-label>${instructionReady ? "I'M READY" : `LOADING ${instructionLoading}%`}</b>
+      </button>
     </section>
   `;
+}
+
+function rankSuffix(rank) {
+  if (rank === 1) return "st";
+  if (rank === 2) return "nd";
+  if (rank === 3) return "rd";
+  return "th";
 }
 
 function renderExtremeGame() {
@@ -315,6 +422,7 @@ function renderExtremeGame() {
 function renderQuestionScreen(round) {
   return `
     <section class="gameplay-frame question-mode">
+      <button class="close-game-button" type="button" data-surrender-open aria-label="Surrender">×</button>
       <div class="gameplay-panel">
         <div class="crest" aria-hidden="true"></div>
         <div class="gameplay-topline">
@@ -328,6 +436,7 @@ function renderQuestionScreen(round) {
           ${round.numbers.flat().map((number) => `<span>${number}</span>`).join("")}
         </div>
       </div>
+      ${renderSurrenderDialog()}
     </section>
   `;
 }
@@ -335,6 +444,7 @@ function renderQuestionScreen(round) {
 function renderAnswerScreen() {
   return `
     <section class="gameplay-frame answer-mode">
+      <button class="close-game-button" type="button" data-surrender-open aria-label="Surrender">×</button>
       <div class="gameplay-panel">
         <div class="crest" aria-hidden="true"></div>
         <header class="answer-header">
@@ -361,6 +471,7 @@ function renderAnswerScreen() {
           </div>
         </div>
       </div>
+      ${renderSurrenderDialog()}
     </section>
   `;
 }
@@ -377,6 +488,7 @@ function renderExtremeResult() {
           <h1>${perfect ? "CHAMPION!" : "SELESAI!"}</h1>
           <strong>${gameState.score}</strong>
           <span>Final Score</span>
+          ${gameState.surrendered ? `<em>Kamu surrender di ronde ${gameState.roundIndex + 1}.</em>` : ""}
           <div class="result-stats">
             <div><b>${gameState.completed.length}</b><small>Ronde selesai</small></div>
             <div><b>${gameState.mistakes}</b><small>Jawaban salah</small></div>
@@ -389,6 +501,28 @@ function renderExtremeResult() {
       </div>
     </section>
   `;
+}
+
+function renderSurrenderDialog() {
+  if (!gameState.confirmSurrender) return "";
+  return `
+    <div class="surrender-backdrop" role="dialog" aria-modal="true" aria-label="Konfirmasi surrender">
+      <div class="surrender-dialog">
+        <h2>Surrender?</h2>
+        <p>Progress akan dihentikan dan kamu langsung masuk ke result page.</p>
+        <div>
+          <button type="button" data-surrender-cancel>Lanjut Main</button>
+          <button type="button" data-surrender-confirm>Ya, Surrender</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function finishExtremeGame() {
+  saveHighScore(gameState.score);
+  activeScreen = "extreme-result";
+  render();
 }
 
 function submitAnswer() {
@@ -408,7 +542,8 @@ function submitAnswer() {
     gameState.input = "";
 
     if (gameState.roundIndex >= rounds.length - 1) {
-      activeScreen = "extreme-result";
+      finishExtremeGame();
+      return;
     } else {
       gameState.roundIndex += 1;
       gameState.mode = "question";
